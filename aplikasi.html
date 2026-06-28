@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Kegiatan Harian</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-card">
+        <div class="card-title">
+            <h1><i class="ri-calendar-check-line"></i> Catatan Kegiatan Harian</h1>
+        </div>
+
+        <div class="card-table">
+            <div class="table-scroll-wrapper" id="tableScrollWrapper">
+            <table id="activityTable">
+                <thead>
+                    <tr>
+                        <th class="no-col">No</th>
+                        <th class="date-col">Tanggal</th>
+                        <th class="time-col">Jam</th>
+                        <th class="kegiatan-col">Kegiatan</th>
+                        <th class="tag-col">Tag</th>
+                        <th class="waktu-col">Waktu Terpakai</th>
+                        <th class="keterangan-col">Keterangan</th>
+                        <th style="width:40px;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        </div>
+
+        <div class="card-buttons">
+            <button class="btn btn-tambah" onclick="addRow()">
+                <i class="ri-add-line"></i> Tambah
+            </button>
+            <button class="btn btn-simpan" onclick="saveData()">
+                <i class="ri-save-line"></i> Simpan
+            </button>
+            <button class="btn btn-hapus" onclick="deleteAll()">
+                <i class="ri-delete-bin-line"></i> Hapus Semua
+            </button>
+        </div>
+    </div>
+
+    <!-- Date Picker Modal -->
+    <div class="modal-overlay" id="dateModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="ri-calendar-line"></i> Pilih Tanggal</h3>
+                <button class="modal-close" onclick="closeDateModal()">×</button>
+            </div>
+            <div class="calendar-nav">
+                <button onclick="prevMonth()"><i class="ri-arrow-left-s-line"></i></button>
+                <span id="calendarMonthYear"></span>
+                <button onclick="nextMonth()"><i class="ri-arrow-right-s-line"></i></button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <button class="btn-confirm-date" onclick="confirmDate()">Konfirmasi Tanggal</button>
+        </div>
+    </div>
+
+    <!-- Analog Time Picker Modal -->
+    <div class="modal-overlay" id="timeModal">
+        <div class="time-picker-modal">
+            <div class="tp-header">
+                <div class="tp-mode-label" id="tpModeLabel">PILIH JAM</div>
+                <div class="tp-digital-display">
+                    <span class="tp-digital-part active" id="tpHour" onclick="switchClockMode('hour')">00</span>
+                    <span class="tp-digital-sep">:</span>
+                    <span class="tp-digital-part" id="tpMinute" onclick="switchClockMode('minute')">00</span>
+                </div>
+            </div>
+            <div class="tp-body">
+                <div class="clock-face" id="clockFace">
+                    <div class="clock-center-dot"></div>
+                    <div class="clock-line" id="clockLine"></div>
+                </div>
+            </div>
+            <div class="tp-footer">
+                <button class="tp-btn-icon" title="Keyboard input">
+                    <i class="ri-keyboard-line"></i>
+                </button>
+                <button class="tp-btn-cancel" onclick="closeTimeModal()">BATAL</button>
+                <button class="tp-btn-confirm" onclick="confirmTime()">✓ OKE</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>

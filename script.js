@@ -624,14 +624,48 @@ function confirmTime() {
 
 async function syncToGoogleSheets(dataArray) {
     try {
-        await fetch(GOOGLE_SHEET_API, {
+        const response = await fetch(GOOGLE_SHEET_API, {
             method: 'POST',
-            body: JSON.stringify(dataArray)
-});
-        console.log("Sinkronisasi ke Spreadsheet berhasil.");
+            body: JSON.stringify(dataArray),
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            console.log("Sinkronisasi ke Spreadsheet berhasil. Jumlah data:", result.count);
+            return true;
+        } else {
+            console.error("Gagal sinkronisasi:", result.message);
+            return false;
+        }
     } catch (error) {
         console.error("Gagal sinkronisasi ke Spreadsheet: ", error);
+        return false;
+    }
 }
+
+// ===== AMBIL DATA DARI GOOGLE SHEET =====
+async function loadFromGoogleSheets() {
+    try {
+        console.log("Mengambil data dari Google Sheet...");
+        
+        const response = await fetch(GOOGLE_SHEET_API);
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            console.log("Data berhasil diambil dari Google Sheet. Jumlah baris:", result.count);
+            return result.data;
+        } else {
+            console.error("Gagal mengambil data:", result.message);
+            return null;
+        }
+    } catch (error) {
+        console.error("Gagal mengambil data dari Google Sheet: ", error);
+        return null;
+    }
 }
 
 // ===== SIMPAN & MUAT DATA =====
@@ -656,13 +690,38 @@ function saveData(showNotification = true) {
 }
 }
 
-function loadData() {
-    var saved = localStorage.getItem('catatanKegiatanHarian');
-    if (saved) {
-        var data = JSON.parse(saved);
-        data.forEach(function(item) { addRow(item); });
-        if (data.length > 0) {
-            showToast(data.length + ' data berhasil dimuat', 'info');
+async function loadData() {
+    // Coba ambil data dari Google Sheet terlebih dahulu
+    const sheetData = await loadFromGoogleSheets();
+    
+    if (sheetData && sheetData.length > 0) {
+        // Jika ada data di Google Sheet, gunakan data dari sana
+        console.log("Memuat", sheetData.length, "baris dari Google Sheet");
+        
+        // Clear tabel dulu
+        document.getElementById('tableBody').innerHTML = '';
+        rowCount = 0;
+        
+        // Tambahkan semua data dari Google Sheet
+        sheetData.forEach(function(item) { 
+            addRow(item); 
+        });
+        
+        // Simpan ke localStorage juga
+        localStorage.setItem('catatanKegiatanHarian', JSON.stringify(sheetData));
+        
+        showToast('✓ ' + sheetData.length + ' data dimuat dari Google Sheet', 'success');
+    } else {
+        // Jika tidak ada data di Google Sheet, coba dari localStorage
+        var saved = localStorage.getItem('catatanKegiatanHarian');
+        if (saved) {
+            var data = JSON.parse(saved);
+            data.forEach(function(item) { addRow(item); });
+            if (data.length > 0) {
+                showToast(data.length + ' data dimuat dari cache lokal', 'info');
+                // Sinkronkan ke Google Sheet
+                syncToGoogleSheets(data);
+            }
         }
     }
 }
@@ -672,7 +731,43 @@ function deleteAll() {
         document.getElementById('tableBody').innerHTML = '';
         rowCount = 0;
         localStorage.removeItem('catatanKegiatanHarian');
+        
+        // Sinkronkan ke Google Sheet (kirim data kosong)
+        syncToGoogleSheets([]);
+        
         showToast('Semua data berhasil dihapus', 'error');
+    }
+}
+
+// ===== REFRESH DARI GOOGLE SHEET =====
+async function refreshFromGoogleSheet() {
+    showToast('Mengambil data terbaru dari Google Sheet...', 'info');
+    
+    const sheetData = await loadFromGoogleSheets();
+    
+    if (sheetData !== null) {
+        // Clear tabel
+        document.getElementById('tableBody').innerHTML = '';
+        rowCount = 0;
+        
+        if (sheetData.length > 0) {
+            // Tambahkan semua data dari Google Sheet
+            sheetData.forEach(function(item) { 
+                addRow(item); 
+            });
+            
+            // Update localStorage
+            localStorage.setItem('catatanKegiatanHarian', JSON.stringify(sheetData));
+            
+            showToast('✓ ' + sheetData.length + ' data berhasil di-refresh dari Google Sheet', 'success');
+        } else {
+            // Jika Google Sheet kosong, tampilkan baris kosong
+            addRow();
+            localStorage.removeItem('catatanKegiatanHarian');
+            showToast('Google Sheet kosong, tabel di-reset', 'info');
+        }
+    } else {
+        showToast('❌ Gagal mengambil data dari Google Sheet', 'error');
     }
 }
 
@@ -769,8 +864,8 @@ function handleTagChange(selectEl) {
 setInterval(calculateWaktuTerpakai, 60000);
 
 // ===== INISIALISASI =====
-window.onload = function() {
-    loadData();
+window.onload = async function() {
+    await loadData();
     if (rowCount === 0) {
         addRow();
     }

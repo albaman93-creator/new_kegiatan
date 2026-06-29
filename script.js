@@ -9,6 +9,8 @@ let selectedHour = 0;
 let selectedMinute = 0;
 let clockMode = 'hour';
 
+const GOOGLE_SHEET_API = 'https://script.google.com/macros/s/AKfycbwy6VhCJHAVoZp76WcdcsQR6yG-zAx3yZFXNZ6eExlkAWQFKAo3xrU4tfV_KJTElwWO/exec'; // Endpoint Google Apps Script
+
 // ===== KONSTANTA =====
 const CLOCK_RADIUS = 130;
 const CLOCK_CENTER = 130;
@@ -532,6 +534,18 @@ function confirmTime() {
     }
 }
 
+async function syncToGoogleSheets(dataArray) {
+    try {
+        await fetch(GOOGLE_SHEET_API, {
+            method: 'POST',
+            body: JSON.stringify(dataArray)
+        });
+        console.log("Sinkronisasi ke Spreadsheet berhasil.");
+    } catch (error) {
+        console.error("Gagal sinkronisasi ke Spreadsheet: ", error);
+    }
+}
+
 // ===== SIMPAN & MUAT DATA =====
 function saveData(showNotification = true) {
     var rows = document.querySelectorAll('#tableBody tr');
@@ -548,6 +562,7 @@ function saveData(showNotification = true) {
     });
 
     localStorage.setItem('catatanKegiatanHarian', JSON.stringify(data));
+    syncToGoogleSheets(data);
     if (showNotification) {
     showToast('Data berhasil disimpan!', 'success');
 }

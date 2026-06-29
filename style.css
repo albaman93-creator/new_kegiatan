@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #1a237e;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -11,7 +11,7 @@ body {
 }
 
 .main-card {
-    background: #764ba2;
+    background: #ffffff;
     border-radius: 16px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     width: 100%;
@@ -28,13 +28,13 @@ body {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: #1a237e;
+    background: #e0e0e0; /* Berubah dari gradient ke abu-abu */
 }
 
 .card-title h1 {
     font-size: 20px;
     font-weight: bold;
-    color: #ffffff;
+    color: #333; /* Mengubah warna teks agar kontras dengan abu-abu */
     text-align: center;
     letter-spacing: 0.5px;
 }
@@ -58,7 +58,7 @@ body {
 #activityTable thead th {
   position: sticky;
   top: 0;
-  background-color: #f2f2f2;
+  background-color: #d1d1d1; /* Warna abu-abu lebih gelap untuk header */
   z-index: 10;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -87,7 +87,7 @@ table {
     font-size: 14px;
 }
 
-thead { background-color: #f2f2f2; }
+thead { background-color: #d1d1d1; }
 
 th {
     padding: 10px;
@@ -108,10 +108,9 @@ td {
 .no-col { width: 40px; font-weight: 600; color: #555; }
 .date-col, .time-col { width: 140px; }
 .kegiatan-col { min-width: 160px; }
-.tag-col { width: 180px; }
+.tag-col { min-width: 150px; } /* Diubah dari width: 130px ke min-width agar menyesuaikan isi */
 .waktu-col { width: 120px; }
-.keterangan-col { min-width: 200px; }
-
+.keterangan-col { min-width: 140px; }
 .picker-wrapper { position: relative; display: inline-block; width: 100%; }
 
 .picker-input {
@@ -574,9 +573,8 @@ td {
     .no-col { width: 30px; }
     .date-col, .time-col { min-width: 140px; }
     .picker-input { font-size: 15px !important; }
-    .tag-col { width: 140px; }
+    .tag-col { min-width: 120px; } /* Sesuaikan juga di mobile agar tidak terlalu sempit */
     .waktu-col { width: 80px; }
-
     .card-buttons {
         flex-direction: column;
         gap: 8px;
@@ -613,4 +611,3 @@ td {
     }
 }
 
-.kegiatan-input { white-space: pre-wrap; word-wrap: break-word; overflow: hidden; resize: none; min-height: 38px; line-height: 1.4; font-family: inherit; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }

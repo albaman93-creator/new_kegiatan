@@ -74,10 +74,10 @@ function addRow(data) {
             '</div>' +
         '</td>' +
         '<td class="kegiatan-col">' +
-            '<textarea class="text-input kegiatan-input" placeholder="Tulis kegiatan..." onkeydown="handleKegiatanEnter(event, this)" oninput="this.style.height=\'auto\';this.style.height=(this.scrollHeight)+\'px\';" style="overflow:hidden; resize:none; width:100%; box-sizing:border-box; min-height:38px; line-height:1.4;">' + kegiatanVal + '</textarea>' +
+            '<input type="text" class="text-input kegiatan-input" value="' + kegiatanVal + '" placeholder="Tulis kegiatan..." onkeydown="handleKegiatanEnter(event, this)">' +
         '</td>' +
         '<td class="tag-col">' +
-            '<select class="tag-select tag-input" onchange="focusKeterangan(this)" onchange="focusKeterangan(this)">' +
+            '<select class="tag-select tag-input" onchange="handleTagChange(this)">' +
                 '<option value="">-- Pilih Tag --</option>' +
                 '<option value="shalat"' + (tagVal === 'shalat' ? ' selected' : '') + '>🕌 Shalat</option>' +
                 '<option value="makan"' + (tagVal === 'makan' ? ' selected' : '') + '>🍽️ Makan</option>' +
@@ -90,7 +90,7 @@ function addRow(data) {
         '</td>' +
         '<td class="waktu-col"><span class="waktu-display">-</span></td>' +
         '<td class="keterangan-col">' +
-            '<input type="text" class="text-input keterangan-input" onkeydown="handleKeteranganEnter(event, this)" onkeydown="handleKeteranganEnter(event, this)" value="' + keteranganVal + '" placeholder="Keterangan...">' +
+            '<input type="text" class="text-input keterangan-input" value="' + keteranganVal + '" placeholder="Keterangan...">' +
         '</td>' +
         '<td>' +
             '<button class="btn-delete-row" onclick="deleteRow(this)" title="Hapus baris">' +
@@ -101,6 +101,10 @@ function addRow(data) {
     tbody.appendChild(tr);
     updateRowNumbers();
     calculateWaktuTerpakai();
+
+    if (!data) {
+        saveData(false);
+    }
 
     // Scroll otomatis ke baris terbaru
     setTimeout(scrollToLatestRow, 100);
@@ -529,7 +533,7 @@ function confirmTime() {
 }
 
 // ===== SIMPAN & MUAT DATA =====
-function saveData() {
+function saveData(showNotification = true) {
     var rows = document.querySelectorAll('#tableBody tr');
     var data = [];
 
@@ -544,7 +548,9 @@ function saveData() {
     });
 
     localStorage.setItem('catatanKegiatanHarian', JSON.stringify(data));
+    if (showNotification) {
     showToast('Data berhasil disimpan!', 'success');
+}
 }
 
 function loadData() {
@@ -587,8 +593,22 @@ document.getElementById('timeModal').addEventListener('click', function(e) {
 
 // ===== FUNGSI BARU =====
 // Fungsi untuk memunculkan dropdown Tag setelah selesai isi Kegiatan (Tekan Enter)
-
-
+function handleKegiatanEnter(event, input) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Mencegah form submit/default behavior
+        var row = input.closest('tr');
+        var tagSelect = row.querySelector('.tag-input');
+        if (tagSelect) {
+            // Untuk browser modern (Chrome, Edge, Safari terbaru)
+            if (typeof tagSelect.showPicker === 'function') {
+                tagSelect.showPicker();
+            } else {
+                // Fallback untuk browser lama
+                tagSelect.focus();
+            }
+        }
+    }
+}
 
 // Fungsi untuk scroll otomatis ke baris terbaru (terbawah)
 function scrollToLatestRow() {
@@ -631,6 +651,18 @@ function formatDuration(totalMinutes) {
     return mins + 'm';
 }
 
+function handleTagChange(selectEl) {
+    // Cari baris tr tempat select ini berada
+    var row = selectEl.closest('tr');
+    if (row) {
+        // Cari input keterangan di baris yang sama
+        var keteranganInput = row.querySelector('.keterangan-input');
+        if (keteranganInput) {
+            keteranganInput.focus(); // Berikan fokus kursor
+        }
+    }
+}
+
 // Update otomatis setiap 1 menit agar "Waktu Terpakai" baris terakhir berjalan real-time
 setInterval(calculateWaktuTerpakai, 60000);
 
@@ -642,23 +674,3 @@ window.onload = function() {
     }
 };
 
-
-function focusKeterangan(selectElement) {
-    var row = selectElement.closest('tr');
-    var keteranganInput = row.querySelector('.keterangan-input');
-    if (keteranganInput) {
-        keteranganInput.focus();
-    }
-}
-
-function handleKeteranganEnter(event, input) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); 
-        saveData(); 
-        addRow(); 
-        setTimeout(scrollToLatestRow, 50);
-        var newRow = document.getElementById('tableBody').lastElementChild;
-        var newDateInput = newRow.querySelector('.date-input');
-        if (newDateInput) newDateInput.focus();
-    }
-}

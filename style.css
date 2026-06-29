@@ -2,7 +2,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a237e;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -28,7 +28,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1a237e;
 }
 
 .card-title h1 {

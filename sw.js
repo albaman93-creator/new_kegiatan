@@ -1,11 +1,13 @@
 // Service Worker untuk Catatan Kegiatan Harian
 const CACHE_NAME = 'kegiatan-harian-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/manifest.json',
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
   'https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css'
 ];
 

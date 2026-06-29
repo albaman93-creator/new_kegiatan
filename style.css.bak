@@ -569,11 +569,10 @@ td {
         border-radius: 8px;
     }
 
-    table { font-size: 15px; min-width: 650px; }
-    th, td { padding: 12px 8px; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 4px; }
     .no-col { width: 30px; }
-    .date-col, .time-col { min-width: 140px; }
-    .picker-input { font-size: 15px !important; }
+    .date-col, .time-col { width: 90px; }
     .tag-col { width: 100px; }
     .waktu-col { width: 80px; }
 

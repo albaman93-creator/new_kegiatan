@@ -108,6 +108,24 @@ td {
 .no-col { width: 40px; font-weight: 600; color: #555; }
 .date-col, .time-col { width: 140px; }
 .kegiatan-col { min-width: 160px; }
+.kegiatan-input {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    resize: none;
+    min-height: 38px;
+    line-height: 1.4;
+    font-family: inherit;
+}
+.kegiatan-input {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: hidden;
+    resize: none;
+    min-height: 38px;
+    line-height: 1.4;
+    font-family: inherit;
+}
 .tag-col { width: 130px; }
 .waktu-col { width: 120px; }
 .keterangan-col { min-width: 140px; }

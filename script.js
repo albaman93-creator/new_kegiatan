@@ -90,7 +90,7 @@ function addRow(data) {
         '</td>' +
         '<td class="waktu-col"><span class="waktu-display">-</span></td>' +
         '<td class="keterangan-col">' +
-            '<input type="text" class="text-input keterangan-input" onkeydown="handleKeteranganEnter(event, this)" value="' + keteranganVal + '" placeholder="Keterangan...">' +
+            '<input type="text" class="text-input keterangan-input" onkeydown="handleKeteranganEnter(event, this)" onkeydown="handleKeteranganEnter(event, this)" value="' + keteranganVal + '" placeholder="Keterangan...">' +
         '</td>' +
         '<td>' +
             '<button class="btn-delete-row" onclick="deleteRow(this)" title="Hapus baris">' +
@@ -587,22 +587,8 @@ document.getElementById('timeModal').addEventListener('click', function(e) {
 
 // ===== FUNGSI BARU =====
 // Fungsi untuk memunculkan dropdown Tag setelah selesai isi Kegiatan (Tekan Enter)
-function handleKegiatanEnter(event, input) {
-    if (event.key === 'Enter') {
-        event.preventDefault(); // Mencegah form submit/default behavior
-        var row = input.closest('tr');
-        var tagSelect = row.querySelector('.tag-input');
-        if (tagSelect) {
-            // Untuk browser modern (Chrome, Edge, Safari terbaru)
-            if (typeof tagSelect.showPicker === 'function') {
-                tagSelect.showPicker();
-            } else {
-                // Fallback untuk browser lama
-                tagSelect.focus();
-            }
-        }
-    }
-}
+
+
 
 // Fungsi untuk scroll otomatis ke baris terbaru (terbawah)
 function scrollToLatestRow() {
@@ -662,5 +648,17 @@ function focusKeterangan(selectElement) {
     var keteranganInput = row.querySelector('.keterangan-input');
     if (keteranganInput) {
         keteranganInput.focus();
+    }
+}
+
+function handleKeteranganEnter(event, input) {
+    if (event.key === 'Enter') {
+        event.preventDefault(); 
+        saveData(); 
+        addRow(); 
+        setTimeout(scrollToLatestRow, 50);
+        var newRow = document.getElementById('tableBody').lastElementChild;
+        var newDateInput = newRow.querySelector('.date-input');
+        if (newDateInput) newDateInput.focus();
     }
 }

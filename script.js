@@ -74,7 +74,7 @@ function addRow(data) {
             '</div>' +
         '</td>' +
         '<td class="kegiatan-col">' +
-            '<input type="text" class="text-input kegiatan-input" value="' + kegiatanVal + '" placeholder="Tulis kegiatan..." onkeydown="handleKegiatanEnter(event, this)">' +
+            '<textarea class="text-input kegiatan-input" placeholder="Tulis kegiatan..." onkeydown="handleKegiatanEnter(event, this)" oninput="this.style.height=\'auto\';this.style.height=(this.scrollHeight)+\'px\';" style="overflow:hidden; resize:none; width:100%; box-sizing:border-box; min-height:38px; line-height:1.4;">' + kegiatanVal + '</textarea>' +
         '</td>' +
         '<td class="tag-col">' +
             '<select class="tag-select tag-input">' +

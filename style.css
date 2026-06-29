@@ -128,7 +128,7 @@ td {
 }
 .tag-col { width: 180px; }
 .waktu-col { width: 120px; }
-.keterangan-col { min-width: 140px; }
+.keterangan-col { min-width: 200px; }
 
 .picker-wrapper { position: relative; display: inline-block; width: 100%; }
 

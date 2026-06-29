@@ -525,7 +525,7 @@ function clockNextStep() {
         currentEditField.value = formatTime(selectedHour, selectedMinute);
 
         // Perbaikan: Pastikan ID overlay sesuai dengan yang ada di index.html (overlayClock)
-        var overlay = document.getElementById('overlayClock');
+        var overlay = document.getElementById('timeModal');
         if (overlay) overlay.style.display = 'none';
 
         // JIKA MODE WIZARD, lanjutkan ke popup form pengisian kegiatan
@@ -600,22 +600,27 @@ document.addEventListener('touchend', function(e) {
 });
 
 function confirmTime() {
+    // Pastikan currentEditField ada (untuk mode normal/tabel)
+    if (currentEditField) {
     currentEditField.value = formatTime(selectedHour, selectedMinute);
+    }
+
     closeTimeModal();
     calculateWaktuTerpakai();
     showToast('Waktu ' + formatTime(selectedHour, selectedMinute) + ' dipilih', 'success');
 
-    // Fokus otomatis ke input kegiatan
-    var kegiatanInput = currentEditRow.querySelector('.kegiatan-input');
-    if (kegiatanInput) {
-        kegiatanInput.focus();
-    }
-
-    if (isWizardMode && currentEditField && currentEditField.id === 'wizTimeDummy') {
-        wizardData.jam = currentEditField.value;
+    // Jika mode wizard, lanjut ke step kegiatan
+    if (isWizardMode) {
+        wizardData.jam = formatTime(selectedHour, selectedMinute);
         setTimeout(() => showWizardStep('kegiatan'), 400);
+            } else {
+        // Mode normal: Fokus otomatis ke input kegiatan di baris yang sedang diedit
+        var kegiatanInput = currentEditRow.querySelector('.kegiatan-input');
+        if (kegiatanInput) {
+            kegiatanInput.focus();
+            }
+        }
     }
-}
 
 async function syncToGoogleSheets(dataArray) {
     try {
@@ -626,7 +631,7 @@ async function syncToGoogleSheets(dataArray) {
         console.log("Sinkronisasi ke Spreadsheet berhasil.");
     } catch (error) {
         console.error("Gagal sinkronisasi ke Spreadsheet: ", error);
-    }
+}
 }
 
 // ===== SIMPAN & MUAT DATA =====
@@ -805,9 +810,13 @@ function finishWizard() {
     wizardData.kegiatan = document.getElementById('wizKegiatan').value;
     wizardData.tag = document.getElementById('wizTag').value;
     wizardData.keterangan = document.getElementById('wizKeterangan').value;
+
     document.getElementById('wizardOverlay').style.display = 'none';
     isWizardMode = false;
-    // Masukkan ke tabel dan simpan (Trigger API Google Sheets)
+
+    // Pastikan data tanggal/jam sudah ada sebelum addRow
+    if (!wizardData.tanggal) wizardData.tanggal = formatDate(new Date());
+    if (!wizardData.jam) wizardData.jam = formatTime(new Date().getHours(), new Date().getMinutes());
     addRow(wizardData);
     saveData(true);
 }

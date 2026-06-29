@@ -77,7 +77,7 @@ function addRow(data) {
             '<textarea class="text-input kegiatan-input" placeholder="Tulis kegiatan..." onkeydown="handleKegiatanEnter(event, this)" oninput="this.style.height=\'auto\';this.style.height=(this.scrollHeight)+\'px\';" style="overflow:hidden; resize:none; width:100%; box-sizing:border-box; min-height:38px; line-height:1.4;">' + kegiatanVal + '</textarea>' +
         '</td>' +
         '<td class="tag-col">' +
-            '<select class="tag-select tag-input" onchange="focusKeterangan(this)">' +
+            '<select class="tag-select tag-input" onchange="focusKeterangan(this)" onchange="focusKeterangan(this)">' +
                 '<option value="">-- Pilih Tag --</option>' +
                 '<option value="shalat"' + (tagVal === 'shalat' ? ' selected' : '') + '>🕌 Shalat</option>' +
                 '<option value="makan"' + (tagVal === 'makan' ? ' selected' : '') + '>🍽️ Makan</option>' +
@@ -90,7 +90,7 @@ function addRow(data) {
         '</td>' +
         '<td class="waktu-col"><span class="waktu-display">-</span></td>' +
         '<td class="keterangan-col">' +
-            '<input type="text" class="text-input keterangan-input" value="' + keteranganVal + '" placeholder="Keterangan...">' +
+            '<input type="text" class="text-input keterangan-input" onkeydown="handleKeteranganEnter(event, this)" value="' + keteranganVal + '" placeholder="Keterangan...">' +
         '</td>' +
         '<td>' +
             '<button class="btn-delete-row" onclick="deleteRow(this)" title="Hapus baris">' +

@@ -611,3 +611,25 @@ td {
     }
 }
 
+/* CSS Tambahan untuk kelancaran drag jarum jam */
+#clockFace {
+    touch-action: none;
+    user-select: none;
+}
+.clock-number, .clock-tick {
+    pointer-events: none; /* Supaya fokus geseran (drag) langsung ke clockFace */
+}
+
+/* WIZARD FORM STYLES */
+.wizard-panel { max-width: 350px; width: 90%; }
+.wizard-body { padding: 25px; background: white; text-align: center; }
+.wizard-body input, .wizard-body select {
+    width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 16px; outline: none; transition: border 0.3s;
+}
+.wizard-body input:focus, .wizard-body select:focus { border-color: #667eea; }
+
+/* Tambahkan ini di akhir style.css untuk memastikan overlay wizard tampil benar */
+#wizardOverlay.active {
+    display: flex !important;
+}
+

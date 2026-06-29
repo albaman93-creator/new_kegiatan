@@ -276,11 +276,20 @@ function confirmDate() {
     if (selectedDate) {
         currentEditField.value = formatDate(selectedDate);
         closeDateModal();
+        // JIKA BUKAN MODE WIZARD, buka jam di baris tabel yang sama
+        if (!isWizardMode && currentEditRow) {
         var timeInput = currentEditRow.querySelector('.time-input');
         setTimeout(function() { openTimePicker(timeInput); }, 200);
+}
         } else {
         showToast('Silakan pilih tanggal terlebih dahulu', 'error');
+        return; // Hentikan eksekusi jika tidak ada tanggal yang dipilih
         }
+    // JIKA MODE WIZARD, lanjutkan ke input jam dummy
+    if (isWizardMode && currentEditField && currentEditField.id === 'wizDateDummy') {
+        wizardData.tanggal = currentEditField.value;
+        setTimeout(() => document.getElementById('wizTimeDummy').click(), 400);
+    }
 }
 
 // ===== ANALOG TIME PICKER =====
@@ -302,8 +311,8 @@ function openTimePicker(input) {
     selectedHour = currentH;
     selectedMinute = currentM;
     clockMode = 'hour';
-    renderClockFace();
-    updateClockDisplay();
+        renderClockFace();
+        updateClockDisplay();
 
     document.getElementById('timeModal').classList.add('active');
 }
@@ -435,23 +444,36 @@ function renderMinuteNumbers(clockFace) {
     }
 }
 
-function selectHour(h) {
+function selectHour(h, autoSwitch = true) {
     selectedHour = h;
     updateClockDisplay();
-    renderClockFace();
-
-    // Otomatis pindah ke mode menit setelah pilih jam
+    updateClockLine();
+    var clockFace = document.getElementById('clockFace');
+    var nums = clockFace.querySelectorAll('.clock-number');
+    nums.forEach(function(el) { el.classList.remove('selected'); });
+    nums.forEach(function(el) {
+        if (parseInt(el.textContent) === h) el.classList.add('selected');
+    });
+    // Hanya pindah ke menit otomatis jika autoSwitch true (saat dilepas)
+    if (autoSwitch) {
     setTimeout(function() {
         clockMode = 'minute';
         renderClockFace();
         updateClockDisplay();
     }, 300);
 }
+}
 
 function selectMinute(m) {
     selectedMinute = m;
     updateClockDisplay();
-    renderClockFace();
+    updateClockLine();
+    var clockFace = document.getElementById('clockFace');
+    var nums = clockFace.querySelectorAll('.clock-number');
+    nums.forEach(function(el) { el.classList.remove('selected'); });
+    nums.forEach(function(el) {
+        if (parseInt(el.textContent) === m) el.classList.add('selected');
+    });
 }
 
 function updateClockLine() {
@@ -493,32 +515,88 @@ function switchClockMode(mode) {
     updateClockDisplay();
 }
 
-// Klik pada clock face
-document.getElementById('clockFace').addEventListener('click', function(e) {
-    var rect = this.getBoundingClientRect();
-    var x = e.clientX - rect.left - CLOCK_CENTER;
-    var y = e.clientY - rect.top - CLOCK_CENTER;
-    var distance = Math.sqrt(x * x + y * y);
+function clockNextStep() {
+    if (clockMode === 'hour') {
+        clockMode = 'minute';
+        renderClockFace();
+        updateClockDisplay();
+    } else {
+        // Jika sudah di menit, simpan dan tutup
+        currentEditField.value = formatTime(selectedHour, selectedMinute);
 
+        // Perbaikan: Pastikan ID overlay sesuai dengan yang ada di index.html (overlayClock)
+        var overlay = document.getElementById('overlayClock');
+        if (overlay) overlay.style.display = 'none';
+
+        // JIKA MODE WIZARD, lanjutkan ke popup form pengisian kegiatan
+        if (isWizardMode && currentEditField && currentEditField.id === 'wizTimeDummy') {
+            wizardData.jam = currentEditField.value;
+            setTimeout(() => showWizardStep('kegiatan'), 400);
+        }
+    }
+}
+
+// ===== FITUR DRAG (GESER HALUS) JARUM JAM =====
+var clockFaceEl = document.getElementById('clockFace');
+var isDraggingTime = false;
+function getAngleAndDistance(e) {
+    var rect = clockFaceEl.getBoundingClientRect();
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    var clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    var x = clientX - rect.left - CLOCK_CENTER;
+    var y = clientY - rect.top - CLOCK_CENTER;
+    var distance = Math.sqrt(x * x + y * y);
     var angle = Math.atan2(y, x) * 180 / Math.PI + 90;
     if (angle < 0) angle += 360;
-
+    return { angle: angle, distance: distance };
+}
+function handleTimeDrag(e, isEnd) {
+    var posData = getAngleAndDistance(e);
     if (clockMode === 'hour') {
-        var pos = Math.round((angle / 360) * 12) % 12;
+        var pos = Math.round((posData.angle / 360) * 12) % 12;
         var map = HOUR_MAP[pos];
-
-        var hour;
-        if (distance < (OUTER_NUM_RADIUS + INNER_NUM_RADIUS) / 2) {
-            hour = map.inner;
+        var hour = (posData.distance < (OUTER_NUM_RADIUS + INNER_NUM_RADIUS) / 2) ? map.inner : map.outer;
+        selectHour(hour, isEnd);
         } else {
-            hour = map.outer;
-        }
-
-        selectHour(hour);
-    } else {
-        var minute = Math.round((angle / 360) * 60) % 60;
+        var minute = Math.round((posData.angle / 360) * 60) % 60;
         selectMinute(minute);
     }
+}
+// Mouse Event (Desktop)
+clockFaceEl.addEventListener('mousedown', function(e) {
+    isDraggingTime = true;
+    handleTimeDrag(e, false);
+});
+document.addEventListener('mousemove', function(e) {
+    if (!isDraggingTime) return;
+    e.preventDefault();
+    handleTimeDrag(e, false);
+}, { passive: false });
+document.addEventListener('mouseup', function(e) {
+    if (!isDraggingTime) return;
+    handleTimeDrag(e, true);
+    isDraggingTime = false;
+});
+// Touch Event (Mobile)
+clockFaceEl.addEventListener('touchstart', function(e) {
+    isDraggingTime = true;
+    handleTimeDrag(e, false);
+}, { passive: true });
+document.addEventListener('touchmove', function(e) {
+    if (!isDraggingTime) return;
+    e.preventDefault();
+    handleTimeDrag(e, false);
+}, { passive: false });
+document.addEventListener('touchend', function(e) {
+    if (!isDraggingTime) return;
+    if (clockMode === 'hour') {
+    setTimeout(function() {
+            clockMode = 'minute';
+            renderClockFace();
+            updateClockDisplay();
+        }, 300);
+}
+    isDraggingTime = false;
 });
 
 function confirmTime() {
@@ -532,6 +610,11 @@ function confirmTime() {
     if (kegiatanInput) {
         kegiatanInput.focus();
     }
+
+    if (isWizardMode && currentEditField && currentEditField.id === 'wizTimeDummy') {
+        wizardData.jam = currentEditField.value;
+        setTimeout(() => showWizardStep('kegiatan'), 400);
+    }
 }
 
 async function syncToGoogleSheets(dataArray) {
@@ -539,7 +622,7 @@ async function syncToGoogleSheets(dataArray) {
         await fetch(GOOGLE_SHEET_API, {
             method: 'POST',
             body: JSON.stringify(dataArray)
-        });
+});
         console.log("Sinkronisasi ke Spreadsheet berhasil.");
     } catch (error) {
         console.error("Gagal sinkronisasi ke Spreadsheet: ", error);
@@ -605,7 +688,6 @@ document.getElementById('dateModal').addEventListener('click', function(e) {
 document.getElementById('timeModal').addEventListener('click', function(e) {
     if (e.target === this) closeTimeModal();
 });
-
 // ===== FUNGSI BARU =====
 // Fungsi untuk memunculkan dropdown Tag setelah selesai isi Kegiatan (Tekan Enter)
 function handleKegiatanEnter(event, input) {
@@ -688,4 +770,55 @@ window.onload = function() {
         addRow();
     }
 };
+
+// ===== LOGIKA WIZARD FORM =====
+let isWizardMode = false;
+let wizardData = {};
+function startWizardForm() {
+    isWizardMode = true;
+    wizardData = {};
+    document.getElementById('wizKegiatan').value = '';
+    document.getElementById('wizTag').value = '';
+    document.getElementById('wizKeterangan').value = '';
+    // Buka date picker otomatis
+    document.getElementById('wizDateDummy').click();
+}
+function showWizardStep(step) {
+    document.getElementById('wizardOverlay').style.display = 'flex';
+    document.getElementById('wizardStepKegiatan').style.display = 'none';
+    document.getElementById('wizardStepTag').style.display = 'none';
+    document.getElementById('wizardStepKeterangan').style.display = 'none';
+    if (step === 'kegiatan') {
+        document.getElementById('wizardTitle').innerText = 'APA KEGIATANMU?';
+        document.getElementById('wizardStepKegiatan').style.display = 'block';
+        setTimeout(() => document.getElementById('wizKegiatan').focus(), 100);
+    } else if (step === 'tag') {
+        document.getElementById('wizardTitle').innerText = 'PILIH TAG';
+        document.getElementById('wizardStepTag').style.display = 'block';
+    } else if (step === 'keterangan') {
+        document.getElementById('wizardTitle').innerText = 'KETERANGAN';
+        document.getElementById('wizardStepKeterangan').style.display = 'block';
+        setTimeout(() => document.getElementById('wizKeterangan').focus(), 100);
+    }
+}
+function finishWizard() {
+    wizardData.kegiatan = document.getElementById('wizKegiatan').value;
+    wizardData.tag = document.getElementById('wizTag').value;
+    wizardData.keterangan = document.getElementById('wizKeterangan').value;
+    document.getElementById('wizardOverlay').style.display = 'none';
+    isWizardMode = false;
+    // Masukkan ke tabel dan simpan (Trigger API Google Sheets)
+    addRow(wizardData);
+    saveData(true);
+}
+function cancelWizard() {
+    document.getElementById('wizardOverlay').style.display = 'none';
+    isWizardMode = false;
+}
+
+// Tambahkan fungsi pembantu untuk menutup overlay jika belum ada
+function tutupOverlay(id) {
+    document.getElementById(id).style.display = 'none';
+    isWizardMode = false;
+}
 

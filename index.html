@@ -37,6 +37,9 @@
             <button class="btn btn-tambah" onclick="addRow()">
                 <i class="ri-add-line"></i> Tambah
             </button>
+            <button class="btn" style="background-color: #48bb78;" onclick="startWizardForm()">
+                <i class="ri-survey-line"></i> Isi via Form
+            </button>
             <button class="btn btn-simpan" onclick="saveData()">
                 <i class="ri-save-line"></i> Simpan
             </button>
@@ -92,6 +95,45 @@
 
     <div class="toast" id="toast"></div>
 
+    <div class="overlay" id="wizardOverlay" style="display: none; z-index: 1000;">
+        <div class="clock-panel wizard-panel">
+            <div class="clock-header">
+                <div class="clock-header-label" id="wizardTitle">KEGIATAN</div>
+            </div>
+            <div class="wizard-body">
+                <div id="wizardStepKegiatan" style="display: none;">
+                    <input type="text" id="wizKegiatan" class="text-input" placeholder="Apa yang kamu lakukan?" onkeydown="if(event.key==='Enter') showWizardStep('tag')" autocomplete="off">
+                    <button class="clock-ok" style="width: 100%; margin-top: 20px;" onclick="showWizardStep('tag')">LANJUT</button>
+                </div>
+                <div id="wizardStepTag" style="display: none;">
+                    <select id="wizTag" class="tag-select tag-input" onchange="showWizardStep('keterangan')">
+                        <option value="">-- Pilih Tag --</option>
+                        <option value="shalat">🕌 Shalat</option>
+                        <option value="makan">🍽️ Makan</option>
+                        <option value="baca quran">📖 Baca Quran</option>
+                        <option value="belajar">📚 Belajar</option>
+                        <option value="tidur">😴 Tidur</option>
+                        <option value="olahraga">🏃 Olahraga</option>
+                        <option value="lainnya">📌 Lainnya</option>
+                    </select>
+                </div>
+                <div id="wizardStepKeterangan" style="display: none;">
+                    <input type="text" id="wizKeterangan" class="text-input" placeholder="Keterangan tambahan..." onkeydown="if(event.key==='Enter') finishWizard()" autocomplete="off">
+                    <button class="clock-ok" style="width: 100%; margin-top: 20px;" onclick="finishWizard()">SIMPAN DATA</button>
+                </div>
+            </div>
+            <div class="clock-btn-row">
+                <button class="clock-cancel" onclick="cancelWizard()">BATAL</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:none;">
+        <input type="text" id="wizDateDummy" onclick="openDatePicker(this)">
+        <input type="text" id="wizTimeDummy" onclick="openTimePicker(this)">
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
+
